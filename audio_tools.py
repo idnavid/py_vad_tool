@@ -37,7 +37,7 @@ def enframe(x, win_len, hop_len):
     n_frames = 1 + np.int(np.floor((len(x) - win_len) / float(hop_len)))
     x_framed = np.zeros((n_frames, win_len))
     for i in range(n_frames):
-        x_framed[i] = x[i * hoplen : i * hop_len + win_len]
+        x_framed[i] = x[i * hop_len : i * hop_len + win_len]
     return x_framed
 
 
