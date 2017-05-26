@@ -1,7 +1,5 @@
 import numpy as np
 from scipy.io import wavfile
-import sys
-import os
 
 
 def add_wgn(s,var=1e-4):
