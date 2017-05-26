@@ -51,7 +51,7 @@ def deframe(x_framed, win_len, hop_len):
     n_samples = n_frames*hop_len + win_len
     x_samples = np.zeros((n_samples,1))
     for i in range(n_frames):
-        x_samples[i*hoplen : i*hoplen + winlen] = x_framed[i]
+        x_samples[i*hop_len : i*hop_len + win_len] = x_framed[i]
     return x_samples
 
 

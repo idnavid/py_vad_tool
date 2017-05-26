@@ -6,18 +6,38 @@
 
 # Updated: May 2017 for Speaker Recognition collaboration.
 
-# The revised version includes addition features Voice Activity Detection. Including:
-# SFM (Spectral Flatness Measure)
 from audio_tools import *
 import numpy as np
-#import pylab
+import pylab
 
 ##Function definitions:
 def vad_help():
 	"""Voice Activity Detection (VAD) tool.
 	
-	Navid Shokouhi July 2012.
+	Navid Shokouhi May 2017.
 	"""
+
+#### Display tools
+def plot_this(s,title=''):
+    s = s.squeeze()
+    if s.ndim ==1:
+        pylab.plot(s)
+    else:
+        pylab.imshow(s,aspect='auto')
+        pylab.title(title)
+    pylab.show()
+
+def plot_these(s1,s2):
+    try:
+        # If values are numpy arrays
+        pylab.plot(s1/max(abs(s1)),color='red')
+        pylab.plot(s2/max(abs(s2)),color='blue')
+    except:
+        # Values are lists
+        pylab.plot(s1,color='red')
+        pylab.plot(s2,color='blue')
+    pylab.legend()
+    pylab.show()
 
 
 #### Energy tools
@@ -30,18 +50,16 @@ def zero_mean(xframes):
     xframes = xframes - np.tile(m,(xframes.shape[1],1)).T
     return xframes
 
-def geo_mean(spect_frames):
-    """Geometric mean of absolute spectrum
-        """
-    return 0
-
-
-
 def compute_nrg(xframes):
-    return np.diagonal(np.dot(xframes,xframes.T))
+    # calculate per frame energy
+    n_frames = xframes.shape[1]
+    return np.diagonal(np.dot(xframes,xframes.T))/float(n_frames)
 
 def compute_log_nrg(xframes):
-    return np.log(compute_nrg(xframes+1e-4))
+    # calculate per frame energy in log
+    n_frames = xframes.shape[1]
+    raw_nrgs = np.log(compute_nrg(xframes+1e-5))/float(n_frames)
+    return (raw_nrgs - np.mean(raw_nrgs))/(np.sqrt(np.var(raw_nrgs)))
 
 def power_spectrum(xframes):
     """
@@ -51,23 +69,55 @@ def power_spectrum(xframes):
     X = np.abs(X[:,:X.shape[1]/2])**2
     return np.sqrt(X)
 
-def compute_sfm(xframes):
-    X = power_spectrum(xframes)
-    return 0
 
 
-
-def main_vad(frames):
-    frames = zero_mean(frames)
+def nrg_vad(xframes,percent_thr,nrg_thr=0.,context=5):
+    """
+        Picks frames with high energy as determined by a 
+        user defined threshold.
+        
+        This function also uses a 'context' parameter to
+        resolve the fluctuative nature of thresholding. 
+        context is an integer value determining the number
+        of neighboring frames that should be used to decide
+        if a frame is voiced.
+        
+        The log-energy values are subject to mean and var
+        normalization to simplify the picking the right threshold. 
+        In this framework, the default threshold is 0.0
+        """
+    xframes = zero_mean(xframes)
+    n_frames = xframes.shape[1]
     
     # Compute per frame energies:
-    frame_nrgs = compute_nrg(frames)
+    xnrgs = compute_log_nrg(xframes)
+    xvad = np.zeros((n_frames,1))
+    for i in range(n_frames):
+        start = max(i-context,0)
+        end = min(i+context,n_frames-1)
+        n_above_thr = np.sum(xnrgs[start:end]>nrg_thr)
+        n_total = end-start+1
+        xvad[i] = 1.*((float(n_above_thr)/n_total) > percent_thr)
+    return xvad
+
 
 if __name__=='__main__':
     test_file='/Users/navidshokouhi/Software_dir/subspace_speechenhancement/data/sa1-falr0_noisy.wav'
     fs,s = read_wav(test_file)
-    s_frames = enframe(s,400,160) # rows: frame index, cols: each frame
-    S = power_spectrum(s_frames)
-    print S.shape
+    win_len = int(fs*0.025)
+    hop_len = int(fs*0.010)
+    sframes = enframe(s,win_len,hop_len) # rows: frame index, cols: each frame
+    plot_this(compute_log_nrg(sframes))
+    
+    # percent_high_nrg is the VAD context ratio. It helps smooth the
+    # output VAD decisions. Higher values are more strict.
+    percent_high_nrg = 0.5
+    
+    vad = nrg_vad(sframes,percent_high_nrg)
+
+    plot_these(deframe(vad,win_len,hop_len),s)
+
+
+
 
 
