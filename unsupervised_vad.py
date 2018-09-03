@@ -114,7 +114,7 @@ if __name__=='__main__':
     win_len = int(fs*0.025)
     hop_len = int(fs*0.010)
     sframes = enframe(s,win_len,hop_len) # rows: frame index, cols: each frame
-    #plot_this(compute_log_nrg(sframes))
+    plot_this(compute_log_nrg(sframes))
     
     # percent_high_nrg is the VAD context ratio. It helps smooth the
     # output VAD decisions. Higher values are more strict.
@@ -122,7 +122,7 @@ if __name__=='__main__':
     
     vad = nrg_vad(sframes,percent_high_nrg)
 
-    #plot_these(deframe(vad,win_len,hop_len),s)
+    plot_these(deframe(vad,win_len,hop_len),s)
 
 
 
