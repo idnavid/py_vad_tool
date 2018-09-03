@@ -8,17 +8,23 @@
 
 from audio_tools import *
 import numpy as np
-import pylab
+
 
 ##Function definitions:
 def vad_help():
-	"""Voice Activity Detection (VAD) tool.
+    """Voice Activity Detection (VAD) tool.
 	
 	Navid Shokouhi May 2017.
-	"""
+    """
+    print("Usage:")
+    print("python unsupervised_vad.py")
 
 #### Display tools
 def plot_this(s,title=''):
+    """
+     
+    """
+    import pylab
     s = s.squeeze()
     if s.ndim ==1:
         pylab.plot(s)
@@ -28,6 +34,7 @@ def plot_this(s,title=''):
     pylab.show()
 
 def plot_these(s1,s2):
+    import pylab
     try:
         # If values are numpy arrays
         pylab.plot(s1/max(abs(s1)),color='red')
@@ -102,12 +109,12 @@ def nrg_vad(xframes,percent_thr,nrg_thr=0.,context=5):
 
 
 if __name__=='__main__':
-    test_file='/Users/navidshokouhi/Software_dir/subspace_speechenhancement/data/sa1-falr0_noisy.wav'
+    test_file='sa1.wav'
     fs,s = read_wav(test_file)
     win_len = int(fs*0.025)
     hop_len = int(fs*0.010)
     sframes = enframe(s,win_len,hop_len) # rows: frame index, cols: each frame
-    plot_this(compute_log_nrg(sframes))
+    #plot_this(compute_log_nrg(sframes))
     
     # percent_high_nrg is the VAD context ratio. It helps smooth the
     # output VAD decisions. Higher values are more strict.
@@ -115,7 +122,7 @@ if __name__=='__main__':
     
     vad = nrg_vad(sframes,percent_high_nrg)
 
-    plot_these(deframe(vad,win_len,hop_len),s)
+    #plot_these(deframe(vad,win_len,hop_len),s)
 
 
 
