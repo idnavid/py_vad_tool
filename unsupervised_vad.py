@@ -109,7 +109,7 @@ def nrg_vad(xframes,percent_thr,nrg_thr=0.,context=5):
 
 
 if __name__=='__main__':
-    test_file='sa1.wav'
+    test_file='data/sa1.wav'
     fs,s = read_wav(test_file)
     win_len = int(fs*0.025)
     hop_len = int(fs*0.010)
