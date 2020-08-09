@@ -94,7 +94,7 @@ def nrg_vad(xframes,percent_thr,nrg_thr=0.,context=5):
         In this framework, the default threshold is 0.0
         """
     xframes = zero_mean(xframes)
-    n_frames = xframes.shape[1]
+    n_frames = xframes.shape[0]
     
     # Compute per frame energies:
     xnrgs = compute_log_nrg(xframes)
